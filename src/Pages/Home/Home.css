@@ -1,0 +1,19 @@
+.homeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.homeLogout {
+  background-color: transparent;
+  border: none;
+  font-size: large;
+  cursor: pointer;
+}
+
+.homeHeroSection {
+  padding: 20px;
+  margin: auto;
+  max-width: 1600px;
+}

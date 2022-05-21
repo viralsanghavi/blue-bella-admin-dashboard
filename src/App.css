@@ -1,0 +1,19 @@
+.app {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  color: #000000;
+  background-color: #292827;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  position: relative;
+}
+
+html,
+body,
+* {
+  margin: 0;
+  box-sizing: border-box;
+}
