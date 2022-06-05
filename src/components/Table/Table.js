@@ -133,7 +133,7 @@ const Table = ({
       }}
     >
       <Box sx={{borderRadius: 4, overflowX: "auto", width: "100%"}}>
-        {limit !== Infinity && (
+        {/* {limit !== Infinity && (
           <Button
             onClick={() => setRowsFullyVisible(!rowsFullyVisible)}
             simple
@@ -141,7 +141,7 @@ const Table = ({
           >
             {rowsFullyVisible ? "Show less" : "Show all"}
           </Button>
-        )}
+        )} */}
         <Box
           as="table"
           id={id}
@@ -168,7 +168,7 @@ const Table = ({
                   ...headerSx,
                 }}
               >
-                {header.map((item, headerIndex) => (
+                {header?.map((item, headerIndex) => (
                   <Box
                     key={keyPrefix + headerIndex}
                     as="th"
@@ -263,7 +263,7 @@ const Table = ({
                         ...trSx,
                       }}
                     >
-                      {row.map((cell, cellIndex) => (
+                      {row?.map((cell, cellIndex) => (
                         <Box
                           key={keyPrefix + cellIndex}
                           as="td"

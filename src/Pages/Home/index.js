@@ -1,10 +1,97 @@
-import React from "react";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  startAt,
+  where,
+} from "firebase/firestore";
+import React, {useEffect, useState} from "react";
 import {Box} from "rebass";
 import Table from "../../components/Table/Table";
-import {auth} from "../../firebase";
+import {auth, db} from "../../firebase";
+import {tipis} from "../../utils/constants";
 import "./Home.css";
 
 const Home = ({user}) => {
+  const [bookingsData, setBookingsData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const convertDate = (date) => {
+    return new Date(date?.toDate().getTime()).toLocaleDateString();
+  };
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      (async () => {
+        const querySnapshot = searchQuery
+          ? await getDocs(
+              query(
+                collection(db, "bookings"),
+                orderBy("bookingId"),
+                startAt(searchQuery),
+                limit(40)
+              )
+            )
+          : await getDocs(
+              query(
+                collection(db, "bookings"),
+                orderBy("startDate", "desc"),
+                limit(40)
+              )
+            );
+        const bookings = [];
+        querySnapshot?.forEach(async (snapshot) => {
+          console.log(snapshot.data());
+          const docRef = doc(db, "orders", snapshot.data().bookingId);
+          const docSnap = await getDoc(docRef);
+
+          bookings.push({
+            id: snapshot.id,
+            ...snapshot.data(),
+            ...docSnap.data(),
+          });
+        });
+        setTimeout(() => {
+          const transformedData = bookings.map(
+            (
+              {
+                name,
+                amount,
+                bookingType,
+                numberOfPeople,
+                startDate,
+                endDate,
+                tipiType,
+                bookingId,
+                email,
+                notes,
+              },
+              index
+            ) => [
+              <Box>{index + 1}</Box>,
+              <Box>{name}</Box>,
+              <Box>{amount}</Box>,
+              <Box>{bookingType}</Box>,
+              <Box>{numberOfPeople}</Box>,
+              <Box>{`${convertDate(startDate)}`}</Box>,
+              <Box>{`${convertDate(endDate)}`}</Box>,
+              <Box>{tipis[tipiType]}</Box>,
+              <Box>{bookingId}</Box>,
+              <Box>{email}</Box>,
+              <Box>{notes}</Box>,
+            ]
+          );
+          setBookingsData(transformedData);
+        }, 1000);
+      })();
+    }, 1000);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
   return (
     <div className="home">
       <header className="homeHeader">
@@ -15,6 +102,30 @@ const Home = ({user}) => {
           </button>
         </p>
       </header>
+      <section style={{padding: "20px"}}>
+        <input
+          style={{
+            width: "100%",
+            height: "100%",
+            padding: "12px 20px",
+            backgroundColor: "white",
+            fontSize: "16px",
+            fontWeight: "400",
+            border: "1px solid black",
+            borderRadius: "7px",
+            boxSizing: "border-box",
+            "&:active, &:focus": {
+              outline: "none",
+            },
+          }}
+          autoFocus
+          type="text"
+          autoComplete="off"
+          className="live-search-field"
+          placeholder="Search by booking Id"
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </section>
       <section className="homeHeroSection">
         <Table
           cellSx={{py: 4}}
@@ -31,60 +142,7 @@ const Home = ({user}) => {
             "Email",
             "Notes",
           ]}
-          rows={[
-            [
-              <Box>1</Box>,
-              <Box>Viral Sanghavi</Box>,
-              <Box>$1234.44</Box>,
-              <Box>Couple</Box>,
-              <Box>2</Box>,
-              <Box>01/01/2001</Box>,
-              <Box>01/01/2001</Box>,
-              <Box>Swiss</Box>,
-              <Box>123ABC09DEF</Box>,
-              <Box>vsanghavi3@gmail.com</Box>,
-              <Box>123ABC09DEF</Box>,
-            ],
-            [
-              <Box>2</Box>,
-              <Box>Viral Sanghavi</Box>,
-              <Box>$1234.44</Box>,
-              <Box>Couple</Box>,
-              <Box>2</Box>,
-              <Box>01/01/2001</Box>,
-              <Box>01/01/2001</Box>,
-              <Box>Swiss</Box>,
-              <Box>123ABC09DEF</Box>,
-              <Box>vsanghavi3@gmail.com</Box>,
-              <Box>123ABC09DEF</Box>,
-            ],
-            [
-              <Box>3</Box>,
-              <Box>Viral Sanghavi</Box>,
-              <Box>$1234.44</Box>,
-              <Box>Couple</Box>,
-              <Box>2</Box>,
-              <Box>01/01/2001</Box>,
-              <Box>01/01/2001</Box>,
-              <Box>Swiss</Box>,
-              <Box>123ABC09DEF</Box>,
-              <Box>vsanghavi3@gmail.com</Box>,
-              <Box>123ABC09DEF</Box>,
-            ],
-            [
-              <Box>4</Box>,
-              <Box>Viral Sanghavi</Box>,
-              <Box>$1234.44</Box>,
-              <Box>Couple</Box>,
-              <Box>2</Box>,
-              <Box>01/01/2001</Box>,
-              <Box>01/01/2001</Box>,
-              <Box>Swiss</Box>,
-              <Box>123ABC09DEF</Box>,
-              <Box>vsanghavi3@gmail.com</Box>,
-              <Box>123ABC09DEF</Box>,
-            ],
-          ]}
+          rows={bookingsData}
         />
       </section>
     </div>
